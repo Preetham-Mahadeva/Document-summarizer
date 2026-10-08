@@ -1,0 +1,132 @@
+# Scope: Finance Doc Summarizer
+
+Working doc. Keep it in the repo. It shows how you plan and make trade-offs.
+
+## Goal
+
+Upload a PDF. Get a structured, page-referenced summary in under a minute.
+
+## Why this project
+
+- Shows LLM API use, prompt design and structured output.
+- Solves a real analyst task: reading long documents fast.
+- Targets finance, compliance and BA roles.
+
+## Target user
+
+A business or financial analyst who must skim a long PDF (policy, annual report, regulatory notice, vendor contract) and extract what matters.
+
+## In scope (MVP)
+
+- Upload one text-based PDF (up to ~50 pages).
+- Extract text page by page, keeping page numbers.
+- Send text to an LLM with a fixed prompt.
+- Return **structured JSON**, validated against a schema.
+- Show the result in a simple web UI (Streamlit).
+- Download the result as JSON and Markdown.
+- Run from the command line too: `python summarize.py file.pdf`.
+
+## Out of scope (for now)
+
+- Scanned PDFs and OCR
+- Multiple documents at once
+- User accounts, databases, login
+- Chat or follow-up questions (that's Project 2, the RAG chatbot)
+- Fine-tuning or training any model
+
+## Output schema
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `title` | string | Document title |
+| `doc_type` | string | Policy, report, contract, notice, other |
+| `one_line_summary` | string | Max 25 words |
+| `executive_summary` | string | 3 to 5 sentences |
+| `key_points` | list | Each with a `page` reference |
+| `key_figures` | list | `label`, `value`, `page` |
+| `risks_or_obligations` | list | Each with a `page` reference |
+| `action_items` | list | Who, what, deadline if stated |
+| `open_questions` | list | What the document leaves unclear |
+
+Rule: if the document doesn't say it, the model must return an empty list. No guessing.
+
+## Tech stack
+
+| Layer | Choice | Why |
+|-------|--------|-----|
+| Language | Python 3.11+ | Standard for LLM work |
+| PDF text | `pdfplumber` (or `pypdf`) | Simple, page-aware |
+| LLM | Claude API via `anthropic` SDK | Model name set in `.env`, easy to swap |
+| Validation | `pydantic` | Enforces the schema |
+| UI | Streamlit | Fast, free hosting on Hugging Face Spaces |
+| Tests | `pytest` | A few basic tests |
+
+## Repo layout
+
+```
+finance-doc-summarizer/
+├── README.md
+├── SCOPE.md
+├── LICENSE
+├── .gitignore
+├── .env.example
+├── requirements.txt
+├── app.py              # Streamlit UI
+├── summarize.py        # CLI entry point
+├── src/
+│   ├── extract.py      # PDF to text with page numbers
+│   ├── prompt.py       # Prompt text
+│   ├── schema.py       # Pydantic models
+│   └── summarize.py    # LLM call and validation
+├── data/
+│   └── samples/        # Public, non-sensitive PDFs only
+├── eval/
+│   ├── test_set.md     # Which PDFs, what to check
+│   └── results.md      # Your scored results
+└── tests/
+```
+
+## Milestones
+
+| When | Deliverable |
+|------|-------------|
+| Week 2 | Repo set up. Text extraction works on 3 sample PDFs. |
+| Week 3 | Prompt and schema work. CLI returns valid JSON. |
+| Week 4 | Streamlit UI, evaluation on 5 PDFs, README finished, demo live. |
+
+## Evaluation plan
+
+- Pick **5 public PDFs**: for example a bank annual report, a regulator notice, a privacy policy, a vendor contract template, a research paper.
+- For each, check the output by hand:
+  - Are key points correct? (score 0 to 2)
+  - Are page references right? (yes/no)
+  - Did it invent anything? (count)
+  - Did it miss something important? (count)
+- Record scores in `eval/results.md`.
+- Report failures honestly in the README.
+
+## Known risks
+
+- **Hallucination:** the model may state things the PDF doesn't say. Mitigation: require page references, spot-check them.
+- **Long documents:** may exceed the model's input limit. Mitigation: cap pages in MVP, note it in the README.
+- **Tables:** text extraction can scramble them. Document this limitation.
+- **Sensitive data:** never commit private documents. Use public samples only.
+- **Cost:** each run costs API credits. Add a page cap and show estimated cost.
+- **Not advice:** output is a reading aid, not financial or legal advice.
+
+## Stretch goals (only after MVP ships)
+
+1. Chunked summarization for 100+ page documents.
+2. Compare two versions of one document and list what changed.
+3. Add OCR for scanned PDFs.
+4. Compare 2 or 3 models on the same test set with a scorecard.
+
+## Definition of done
+
+- [ ] Quick Start works in a fresh GitHub Codespace
+- [ ] 5-document evaluation completed and published
+- [ ] README has demo GIF, example output, limitations
+- [ ] No API keys or private data in the repo history
+- [ ] Live demo link works
+- [ ] Repo pinned on GitHub profile
+- [ ] Added to resume and LinkedIn Featured
