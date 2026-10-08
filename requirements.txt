@@ -1,0 +1,6 @@
+   anthropic
+   pdfplumber
+   pydantic
+   streamlit
+   python-dotenv
+   pytest
