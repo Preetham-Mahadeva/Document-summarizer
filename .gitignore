@@ -218,3 +218,20 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Secrets
+.env
+*.key
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Private documents (keep only public samples)
+data/*
+!data/samples/
+!data/samples/**
+
+# Outputs
+output/
+*.log
+.DS_Store
